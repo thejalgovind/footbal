@@ -12,19 +12,18 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, './')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-// TiDB Connection Pool
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT || 4000,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
-    ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }, // Required for TiDB Cloud
+    ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true },
     waitForConnections: true,
     connectionLimit: 10
 });
 
-// FIXED ROUTES: Removed ".rows"
+// MySQL uses [rows] destructuring - NOT result.rows
 app.get('/api/jerseys', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM jerseys');
@@ -46,4 +45,4 @@ app.get('/api/balls', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.listen(port, () => console.log(`🚀 Server on port ${port}`));
+app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
