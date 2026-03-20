@@ -1,27 +1,30 @@
+require('dotenv').config(); // Loads variables from .env
 const express = require('express');
-const mysql = require('mysql2/promise'); // Switched to MySQL for TiDB
+const mysql = require('mysql2/promise');
 const cors = require('cors');
 const path = require('path');
+
 const app = express();
-const port = 3000;
+// Render will provide its own PORT, otherwise it uses 3000
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// Serve static files (your HTML, CSS, JS)
+// Serve static files
 app.use(express.static(path.join(__dirname, './')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-// TiDB CLOUD CONNECTION
+// TiDB CLOUD CONNECTION using environment variables
 const pool = mysql.createPool({
-    host: 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
-    port: 4000,
-    user: '3K19aH5r9hz9jne.root',
-    password: 'U54NI2wVB99xdceO',
-    database: 'test',
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
     ssl: {
         minVersion: 'TLSv1.2',
-        rejectUnauthorized: true // TiDB Cloud requires SSL
+        rejectUnauthorized: true 
     },
     waitForConnections: true,
     connectionLimit: 10,
@@ -51,5 +54,5 @@ app.get('/api/balls', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`🚀 TiDB Connected! Server running at http://localhost:${port}`);
+    console.log(`🚀 TiDB Connected! Server running on port ${port}`);
 });
